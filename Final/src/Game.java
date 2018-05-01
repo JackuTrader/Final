@@ -17,6 +17,11 @@ import javafx.util.Duration;
 
 public class Game extends Application implements EventHandler<ActionEvent>{
 	PathTransition wrPlay = null;
+	Circle QB = new Circle(10);
+	Circle WR = new Circle(10);
+	Circle DB = new Circle(10);
+	Pane pane = new Pane();
+	
 	public static void main(String[] args) {
 		launch();
 
@@ -24,57 +29,48 @@ public class Game extends Application implements EventHandler<ActionEvent>{
 
 	@Override
 	public void start(Stage primaryStage) throws Exception {
-		int f;
-		int s;
 		HBox hbox = new HBox();
-		Pane pane = new Pane();
 		buttons(hbox);
 		createField(pane);
 		createPlayers(pane);
 		Scene scene = new Scene(pane,800,840);
 		Scene scene2 = new Scene(hbox,200,200);
-		primaryStage.setScene(scene2);
+		primaryStage.setScene(scene);
 		primaryStage.show();
-		Button p1 = new Button("Player One");
-		Button p2 = new Button("Player Two");
-		p1.setOnAction(this);
-		p2.setOnAction(this);
-		wrPlay.play();
+		Stage secondStage = new Stage();
+		secondStage.setScene(scene2);
+		secondStage.show();
 		
 	}
 	public void buttons(Pane pane){
 		Button p1 = new Button("Player One");
-		Button p2 = new Button("Player Two");
+		pane.getChildren().addAll(p1);
 		p1.setOnAction(this);
-		p2.setOnAction(this);
-		pane.getChildren().addAll(p1,p2);
 	}
-	public void createPlayers(Pane pane) {
-		Circle QB = new Circle(10);
-		Circle WR = new Circle(10);
-		Circle DB = new Circle(10);
-		
+	public void createPlayers(Pane pane) {		
 		QB.setCenterX(400);
-		QB.setCenterY(280);
-		WR.setCenterY(280);
+		QB.setCenterY(420);
+		
+		WR.setCenterY(420);
 		WR.setCenterX(170);
+		
 		DB.setCenterX(170);
-		DB.setCenterY(260);
+		DB.setCenterY(400);
 		
 		QB.setFill(Color.BLUE);
 		WR.setFill(Color.BLUE);
 		DB.setFill(Color.RED);
 		
 		Polyline path = new Polyline();
-		path.getPoints().addAll(new Double[]{170.0,280.0,
-				170.0,140.0,
-				380.0,100.0});
+		path.getPoints().addAll(new Double[]{170.0,700.0,
+				170.0,670.0,
+				300.0,630.0});
 		wrPlay = new PathTransition();
 		wrPlay.setNode(WR);
 		wrPlay.setPath(path);
-		wrPlay.setDuration(Duration.seconds(5));
-		wrPlay.setCycleCount(Timeline.INDEFINITE);
-		//wrPlay.play();
+		wrPlay.setDuration(Duration.seconds(3));
+		wrPlay.setCycleCount(1);
+		
 		
 		pane.getChildren().addAll(QB,WR,DB);
 	}
@@ -144,11 +140,53 @@ public class Game extends Application implements EventHandler<ActionEvent>{
 
 	@Override
 	public void handle(ActionEvent event) {
-		Text t = new Text();
-		t.setText(String.valueOf((int)(Math.random()*10)));
-			
+		int player1 = (int)(Math.random()*10);
+		int player2 = (int)(Math.random()*10);
+		if(player1>player2) {
+			System.out.println("Catch for 10 yards!");
+			wrPlay.play();
+			foward(pane);
 		}
+		else if(player1<player2) {
+			System.out.println("Interception for 10 yards!");
+			wrPlay.play();
+			backward(pane);
+		}
+		else System.out.println("Ball dropped");
+		wrPlay.play();
 		
 	}
+	
+	public void foward(Pane pane) {
+		double qbp2 = QB.getCenterY();
+		double wrp2 = WR.getCenterY();
+		double dbp2 = DB.getCenterY();
+		QB.setCenterY(qbp2-70);
+		WR.setCenterY(wrp2-70);
+		DB.setCenterY(dbp2-70);
+		win(QB);
+	}
+	
+	public void backward(Pane pane) {
+		double qbp2 = QB.getCenterY();
+		double wrp2 = WR.getCenterY();
+		double dbp2 = DB.getCenterY();
+		QB.setCenterY(qbp2+70);
+		WR.setCenterY(wrp2+70);
+		DB.setCenterY(dbp2+70);
+		win(QB);
+	}
+	
+	public void win(Circle c) {
+		if(c.getCenterY()>=770) {
+			System.out.println("Player 2 wins!");
+			System.exit(0);
+		}
+		else if(c.getCenterY()<=70) {
+			System.out.println("Player 1 wins!");
+			System.exit(0);
+		}
+	}
+}
 
 

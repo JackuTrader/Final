@@ -1,7 +1,11 @@
 import javafx.animation.PathTransition;
 import javafx.animation.Timeline;
 import javafx.application.Application;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
@@ -11,7 +15,7 @@ import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
-public class Game extends Application {
+public class Game extends Application implements EventHandler<ActionEvent>{
 	PathTransition wrPlay = null;
 	public static void main(String[] args) {
 		launch();
@@ -20,14 +24,30 @@ public class Game extends Application {
 
 	@Override
 	public void start(Stage primaryStage) throws Exception {
+		int f;
+		int s;
+		HBox hbox = new HBox();
 		Pane pane = new Pane();
+		buttons(hbox);
 		createField(pane);
 		createPlayers(pane);
 		Scene scene = new Scene(pane,800,840);
-		primaryStage.setScene(scene);
+		Scene scene2 = new Scene(hbox,200,200);
+		primaryStage.setScene(scene2);
 		primaryStage.show();
+		Button p1 = new Button("Player One");
+		Button p2 = new Button("Player Two");
+		p1.setOnAction(this);
+		p2.setOnAction(this);
 		wrPlay.play();
 		
+	}
+	public void buttons(Pane pane){
+		Button p1 = new Button("Player One");
+		Button p2 = new Button("Player Two");
+		p1.setOnAction(this);
+		p2.setOnAction(this);
+		pane.getChildren().addAll(p1,p2);
 	}
 	public void createPlayers(Pane pane) {
 		Circle QB = new Circle(10);
@@ -122,4 +142,13 @@ public class Game extends Application {
 		
 	}
 
-}
+	@Override
+	public void handle(ActionEvent event) {
+		Text t = new Text();
+		t.setText(String.valueOf((int)(Math.random()*10)));
+			
+		}
+		
+	}
+
+

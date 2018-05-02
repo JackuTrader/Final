@@ -7,6 +7,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Polyline;
@@ -21,6 +22,8 @@ public class Game extends Application implements EventHandler<ActionEvent>{
 	Circle WR = new Circle(10);
 	Circle DB = new Circle(10);
 	Pane pane = new Pane();
+	VBox hbox = new VBox();
+	Text co = new Text();
 	
 	public static void main(String[] args) {
 		launch();
@@ -29,12 +32,13 @@ public class Game extends Application implements EventHandler<ActionEvent>{
 
 	@Override
 	public void start(Stage primaryStage) throws Exception {
-		HBox hbox = new HBox();
+		hbox.setSpacing(10);
+		hbox.getChildren().addAll(co);
 		buttons(hbox);
 		createField(pane);
 		createPlayers(pane);
 		Scene scene = new Scene(pane,800,840);
-		Scene scene2 = new Scene(hbox,200,200);
+		Scene scene2 = new Scene(hbox,135,150);
 		primaryStage.setScene(scene);
 		primaryStage.show();
 		Stage secondStage = new Stage();
@@ -42,11 +46,18 @@ public class Game extends Application implements EventHandler<ActionEvent>{
 		secondStage.show();
 		
 	}
+	public void setCallOuts(String t) {
+		co.setText(t);
+		co.setX(100);
+		co.setY(100);
+	}
 	public void buttons(Pane pane){
 		Button p1 = new Button("Player One");
 		pane.getChildren().addAll(p1);
 		p1.setOnAction(this);
 	}
+	
+	//Makes the players
 	public void createPlayers(Pane pane) {		
 		QB.setCenterX(400);
 		QB.setCenterY(420);
@@ -61,20 +72,13 @@ public class Game extends Application implements EventHandler<ActionEvent>{
 		WR.setFill(Color.BLUE);
 		DB.setFill(Color.RED);
 		
-		Polyline path = new Polyline();
-		path.getPoints().addAll(new Double[]{170.0,700.0,
-				170.0,670.0,
-				300.0,630.0});
-		wrPlay = new PathTransition();
-		wrPlay.setNode(WR);
-		wrPlay.setPath(path);
-		wrPlay.setDuration(Duration.seconds(3));
-		wrPlay.setCycleCount(1);
-		
+		runPathWR();
+		runPathDB();
 		
 		pane.getChildren().addAll(QB,WR,DB);
 	}
 	
+	//Creates football field
 	public void createField(Pane pane) {
 		Text t = new Text();
 		t.setText("TOUCHDOWN");
@@ -142,21 +146,21 @@ public class Game extends Application implements EventHandler<ActionEvent>{
 	public void handle(ActionEvent event) {
 		int player1 = (int)(Math.random()*10);
 		int player2 = (int)(Math.random()*10);
+		
 		if(player1>player2) {
-			System.out.println("Catch for 10 yards!");
-			wrPlay.play();
 			foward(pane);
 		}
 		else if(player1<player2) {
-			System.out.println("Interception for 10 yards!");
-			wrPlay.play();
 			backward(pane);
 		}
-		else System.out.println("Ball dropped");
-		wrPlay.play();
-		
+		else {
+			runPathWR();
+			runPathDB();
+			setCallOuts("Ball dropped. No gains.");
+		}
 	}
 	
+	//Moves player foward by 10 yards
 	public void foward(Pane pane) {
 		double qbp2 = QB.getCenterY();
 		double wrp2 = WR.getCenterY();
@@ -164,9 +168,13 @@ public class Game extends Application implements EventHandler<ActionEvent>{
 		QB.setCenterY(qbp2-70);
 		WR.setCenterY(wrp2-70);
 		DB.setCenterY(dbp2-70);
+		runPathWR();
+		runPathDB();
+		setCallOuts("Catch for 10 yards!");
 		win(QB);
 	}
 	
+	//Moves player backward by 10 yards
 	public void backward(Pane pane) {
 		double qbp2 = QB.getCenterY();
 		double wrp2 = WR.getCenterY();
@@ -174,18 +182,52 @@ public class Game extends Application implements EventHandler<ActionEvent>{
 		QB.setCenterY(qbp2+70);
 		WR.setCenterY(wrp2+70);
 		DB.setCenterY(dbp2+70);
+		runPathWR();
+		runPathDB();
+		setCallOuts("Interception for 10 yards!");
 		win(QB);
 	}
 	
+	//Sets up win condition
 	public void win(Circle c) {
 		if(c.getCenterY()>=770) {
-			System.out.println("Player 2 wins!");
-			System.exit(0);
+			setCallOuts("Player 2 wins!");
+			
 		}
 		else if(c.getCenterY()<=70) {
-			System.out.println("Player 1 wins!");
-			System.exit(0);
+			setCallOuts("Player 1 wins!");
+			
 		}
+	}
+	
+	//Creates run Path for wide receiver
+	public void runPathDB() {
+		wrPlay = new PathTransition();
+		Polyline path = new Polyline();
+		double y = WR.getCenterY();
+		path.getPoints().addAll(new Double[]{170.0,(y-20),
+					170.0,(y-60),
+					300.0,(y-80)});
+		wrPlay.setNode(DB);
+		wrPlay.setPath(path);
+		wrPlay.setDuration(Duration.seconds(3));
+		wrPlay.setCycleCount(1);
+		wrPlay.play();
+			
+		}
+	
+	public void runPathWR() {
+		wrPlay = new PathTransition();
+		Polyline path = new Polyline();
+		double y = QB.getCenterY();
+		path.getPoints().addAll(new Double[]{170.0,y,
+					170.0,(y-40),
+					300.0,(y-70)});
+		wrPlay.setNode(WR);
+		wrPlay.setPath(path);
+		wrPlay.setDuration(Duration.seconds(3));
+		wrPlay.setCycleCount(1);
+		wrPlay.play();
 	}
 }
 
